@@ -7,6 +7,7 @@ use SilverStripe\View\ArrayData;
 use SilverStripe\View\SSViewer;
 use SilverStripe\Forms\GridField\GridFieldViewButton;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\FieldType\DBHTMLText;
 
 /**
  * DataObjectHistory
@@ -15,19 +16,21 @@ use SilverStripe\ORM\DataObject;
  */
 class GridFieldHistoryButton extends GridFieldViewButton
 {
-    public function getColumnContent($field, $record, $col)
+    public function getColumnContent($field, DataObject $record, string $col): ?DBHTMLText
     {
         if ($record->isLatestVersion()) {
             return null;
         }
 
-        $data = new ArrayData(array(
-            'Link' => Controller::join_links(
-                $field->Link('item'),
-                $record->ID,
-                'view?VersionID='. $record->Version
-            )
-        ));
+        $data = new ArrayData(
+            [
+                'Link' => Controller::join_links(
+                    $field->Link('item'),
+                    $record->ID,
+                    'view?VersionID=' . $record->Version
+                )
+            ]
+        );
 
         $template = SSViewer::get_templates_by_class(
             $this,

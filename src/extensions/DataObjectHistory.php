@@ -27,10 +27,9 @@ use gorriecoe\DataObjectHistory\Forms\HistoryGridFieldItemRequest;
 class DataObjectHistory extends DataExtension
 {
     /**
-     * Update Fields
-     * @return FieldList
+     * @inheritDoc
      */
-    public function updateCMSFields(FieldList $fields)
+    public function updateCMSFields(FieldList $fields): FieldList
     {
         $owner = $this->owner;
         if ($owner->HistoryFields) {
@@ -39,15 +38,16 @@ class DataObjectHistory extends DataExtension
                 $owner->HistoryFields
             );
         }
+
         return $fields;
     }
 
-
     /**
-     * Returns the history fields for this dataobject.
-     * @return FieldList
+     * Returns the history fields for this DataObject.
+     *
+     * @return FieldList|null
      */
-    public function getHistoryFields()
+    public function getHistoryFields(): ?FieldList
     {
         $owner = $this->owner;
         if (!$owner->isLatestVersion()) {
@@ -81,23 +81,22 @@ class DataObjectHistory extends DataExtension
                 Versioned::get_all_versions(
                     $owner->ClassName,
                     $owner->ID
-                )
-                ->sort('Version', 'DESC'),
+                )->sort('Version', 'DESC'),
                 $config
-            )
-            ->addExtraClass('grid-field--history')
+            )->addExtraClass('grid-field--history')
         );
     }
 
     /**
-     * @return Member
+     * @return Member|null
      */
-    public function getAuthor()
+    public function getAuthor(): ?Member
     {
         $owner = $this->owner;
         if ($owner->AuthorID) {
             return Member::get()->byId($owner->AuthorID);
         }
+
         return null;
     }
 }

@@ -9,8 +9,21 @@ composer require gorriecoe/silverstripe-dataobjecthistory
 
 ## Requirements
 
-- silverstripe/framework ^4.0
-- symbiote/silverstripe-gridfieldextensions ^3.1
+This module supports Silverstripe CMS 4 and CMS 5.
+
+### CMS 5
+
+Requires the following module versions:
+
+- `silverstripe/framework` ^5.0
+- `symbiote/silverstripe-gridfieldextensions` ^4.0
+
+### CMS 4
+
+Requires the following module versions:
+
+- `silverstripe/framework` ^4.0
+- `symbiote/silverstripe-gridfieldextensions` ^3.1
 
 ## Maintainers
 
