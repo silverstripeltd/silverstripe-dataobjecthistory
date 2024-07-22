@@ -40,7 +40,7 @@ class HistoryGridFieldItemRequest extends VersionedGridFieldItemRequest
      */
     protected ?int $versionID = null;
 
-    public function __construct(GridField $gridField, $component, DataObject $record, $requestHandler, $popupFormName)
+    public function __construct($gridField, $component, $record, $requestHandler, $popupFormName)
     {
         if ($this->versionID = $requestHandler->getRequest()->requestVar('VersionID')) {
             if (!$record = Versioned::get_version(get_class($record), $record->ID, $this->versionID)) {
