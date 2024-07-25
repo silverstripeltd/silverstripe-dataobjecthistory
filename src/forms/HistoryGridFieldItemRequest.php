@@ -54,7 +54,10 @@ class HistoryGridFieldItemRequest extends VersionedGridFieldItemRequest
         parent::__construct($gridField, $component, $record, $requestHandler, $popupFormName);
     }
 
-    public function view(HTTPRequest $request): HTTPResponse
+    /*
+     * @inheritDoc
+     */
+    public function view($request)
     {
         if (!$this->record->canView()) {
             return $this->httpError(403);
