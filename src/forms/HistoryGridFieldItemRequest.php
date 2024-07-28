@@ -1,4 +1,5 @@
 <?php
+
 namespace gorriecoe\DataObjectHistory\Forms;
 
 use SilverStripe\Forms\FieldList;
@@ -13,6 +14,10 @@ use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\Versioned\VersionedGridFieldItemRequest;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\View\ArrayData;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Control\HTTPResponse;
+use SilverStripe\Forms\Form;
+use SilverStripe\ORM\DataObject;
 
 /**
  * DataObjectHistory
@@ -31,9 +36,9 @@ class HistoryGridFieldItemRequest extends VersionedGridFieldItemRequest
     ];
 
     /**
-     * @var int
+     * @var int|null
      */
-    protected $versionID;
+    protected ?int $versionID = null;
 
     public function __construct($gridField, $component, $record, $requestHandler, $popupFormName)
     {
@@ -45,28 +50,36 @@ class HistoryGridFieldItemRequest extends VersionedGridFieldItemRequest
                 );
             }
         }
+
         parent::__construct($gridField, $component, $record, $requestHandler, $popupFormName);
     }
 
+    /*
+     * @inheritDoc
+     */
     public function view($request)
     {
         if (!$this->record->canView()) {
-            $this->httpError(403);
+            return $this->httpError(403);
         }
+
         $controller = $this->getToplevelController();
         $form = $this->ItemEditForm();
+
         $data = ArrayData::create([
             'Backlink' => $controller->Link(),
             'ItemEditForm' => $form
         ]);
+
         $return = $data->renderWith($this->getTemplates());
         if ($request->isAjax()) {
-            return $return;
+            return HTTPResponse::create($return);
         }
+
         return $controller->customise(['Content' => $return]);
     }
 
-    public function ItemEditForm()
+    public function ItemEditForm(): Form
     {
         $form = parent::ItemEditForm();
         $fields = $form->Fields();
@@ -103,11 +116,13 @@ class HistoryGridFieldItemRequest extends VersionedGridFieldItemRequest
             DBField::create_field('HTMLFragment', $message),
             'notice'
         );
+
         $form->setFields($fields);
+
         return $form;
     }
 
-    public function doRollback($data, $form)
+    public function doRollback(array $data, Form $form): HTTPResponse
     {
         $record = $this->record;
 
@@ -118,18 +133,18 @@ class HistoryGridFieldItemRequest extends VersionedGridFieldItemRequest
 
         // Save from form data
         $record->doRollbackTo($record->Version);
-        $link = '<a href="' . $this->Link('edit') . '">"'
+        $link = '<a href="' . $this->Link('edit') . '">'
             . htmlspecialchars($record->Title, ENT_QUOTES)
-            . '"</a>';
+            . '</a>';
 
         $message = _t(
             __CLASS__ . '.RolledBack',
             'Rolled back {name} to version {version} {link}',
-            array(
+            [
                 'name' => $record->i18n_singular_name(),
                 'version' => $record->Version,
                 'link' => $link
-            )
+            ]
         );
 
         $form->sessionMessage($message, 'good', ValidationResult::CAST_HTML);
@@ -138,9 +153,11 @@ class HistoryGridFieldItemRequest extends VersionedGridFieldItemRequest
         return $controller->redirect($record->CMSEditLink());
     }
 
-    public function getFormActions()
+    public function getFormActions(): FieldList
     {
+        $actions = parent::getFormActions();
         $record = $this->getRecord();
+
         if (!$record || !$record->has_extension(Versioned::class)) {
             return $actions;
         }
@@ -148,7 +165,6 @@ class HistoryGridFieldItemRequest extends VersionedGridFieldItemRequest
         $this->beforeExtending('updateFormActions', function (FieldList $actions) use ($record) {
             if (!$record->isLatestVersion()) {
                 $actions->removeByName([
-                    'action_doUnpublish',
                     'action_doUnpublish',
                     'action_doDelete',
                     'action_doSave',
@@ -172,7 +188,6 @@ class HistoryGridFieldItemRequest extends VersionedGridFieldItemRequest
             }
         });
 
-        $actions = parent::getFormActions();
         return $actions;
     }
 }
