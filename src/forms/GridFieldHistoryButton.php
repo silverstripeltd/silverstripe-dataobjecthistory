@@ -41,22 +41,6 @@ class GridFieldHistoryButton extends GridFieldViewButton
             GridFieldViewButton::class
         );
 
-        return $data->renderWith($template);        $data = new ArrayData(
-            [
-                'Link' => Controller::join_links(
-                    $field->Link('item'),
-                    $record->ID,
-                    'view?VersionID=' . $record->Version
-                )
-            ]
-        );
-
-        $template = SSViewer::get_templates_by_class(
-            $this,
-            '',
-            GridFieldViewButton::class
-        );
-
         return $data->renderWith($template);
     }
 }
